@@ -13,6 +13,7 @@
 #include <cmath>
 #include <iomanip>
 #include <vector>
+#include <sstream>
 
 #endif
 

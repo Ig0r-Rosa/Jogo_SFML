@@ -13,6 +13,7 @@
 #include <cmath>
 #include <iomanip>
 #include <vector>
+#include <sstream>
 
 #endif
 
@@ -25,6 +26,7 @@ class Fase_1
 {
     private:
     bool naFase;
+    bool pausado;
     unsigned int screenWidth;
     unsigned int screenHeight;
     bool backgroundStatus;
@@ -34,6 +36,9 @@ class Fase_1
     sf::View view;
         
     sf::Clock timer; // Timer global
+    sf::Clock pausaTimer; // Novo timer para controlar os 3 segundos de pausa
+    float tempoEmJogo; 
+    bool iniciouFase;
     float deltaTime; // Guarda diferença do timer global
     bool movendoEsq;
     bool movendoDir;
@@ -42,15 +47,35 @@ class Fase_1
     FPS * fps;
     Plataforma * chao;
 
+    // Exibir coisas na tela
+    sf::Font * font;
+    sf::Text textoTempoEmJogo;
+    sf::Text MensagemTela;
+
     // Função para encapsular cálculo de deltaTime
-    void calcularDeltaTime() {
-        deltaTime = timer.restart().asSeconds();
+    void calcularDeltaTime() 
+    {
+        // Somente atualiza deltaTime se o jogo não estiver pausado
+        if (!pausado) 
+        {
+            deltaTime = timer.restart().asSeconds();
+            tempoEmJogo += deltaTime; // Acumula o tempo de jogo
+        }
+        else 
+        {
+            // Se o jogo estiver pausado, não atualiza o deltaTime e não reinicia o timer
+            timer.restart(); // Impede o acúmulo de tempo durante a pausa
+            deltaTime = 0;
+        }
     }
 
     public:
     Fase_1()
     {
         naFase = true;
+        pausado = true;
+        tempoEmJogo = 0.0;
+        iniciouFase = false;
         movendoEsq = false;
         movendoDir = false;
         backgroundStatus = false;
@@ -62,6 +87,7 @@ class Fase_1
         delete musica;
         delete fps;
         delete chao;
+        delete font;
     };
 
     void setupFase(unsigned int screenWidth, unsigned int screenHeight) {
@@ -72,6 +98,28 @@ class Fase_1
 
         fps = new FPS();
         fps->setupFPS("arquivos/fonte.ttf");
+
+        font = new sf::Font();
+        font->loadFromFile("./arquivos/fonte.ttf");
+
+        float escala = std::min(static_cast<float>(screenWidth) / 1366, static_cast<float>(screenHeight) / 768);
+
+        // Texto do tempo do jogo
+        textoTempoEmJogo.setFont(*font);
+        textoTempoEmJogo.setCharacterSize(40 * escala);
+        textoTempoEmJogo.setOutlineThickness(1);
+        float xTempoEmJogo = ((1150 * screenWidth) / 1366.0f);
+        float yTempoEmJogo = ((100 * screenHeight) / 768.0f);
+        textoTempoEmJogo.setPosition(xTempoEmJogo, yTempoEmJogo);
+        textoTempoEmJogo.setFillColor(sf::Color::White); // Cor do texto
+
+        // Mensagem na tela
+        MensagemTela.setFont(*font);
+        MensagemTela.setCharacterSize(130 * escala);
+        MensagemTela.setFillColor(sf::Color::White); // Cor do texto
+        float xMensagemTela = ((475 * screenWidth) / 1366.0f);
+        float yMensagemTela = ((200 * screenHeight) / 768.0f);
+        MensagemTela.setPosition(xMensagemTela, yMensagemTela);
 
         perso = new Personagem();
 
@@ -117,36 +165,71 @@ class Fase_1
 
     void inputFase(sf::Event &event)
     {
-        if (event.type == sf::Event::KeyPressed)
+        
+        // Movimento do personagem
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
         {
-            // Movimento do personagem
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-            {
-                perso->andarEsq(deltaTime);
-                movendoEsq = true;
-            }
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-            {
-                perso->andarDir(deltaTime);
-                movendoDir = true;
-            }
+            perso->andarEsq(deltaTime);
+            movendoEsq = true;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        {
+            perso->andarDir(deltaTime);
+            movendoDir = true;
         }
     };
 
     void faseLoop(sf::RenderWindow& window) {
         calcularDeltaTime();  // Atualiza o deltaTime
-        perso->aplicarGravidade(deltaTime);
-        perso->verificarColisao(chao->colisaoArea, deltaTime);
-        perso->atualizarAnimacao(deltaTime, movendoEsq, movendoDir);
+        if(!pausado)
+        {
+            perso->aplicarGravidade(deltaTime);
+            perso->verificarColisao(chao->colisaoArea, deltaTime);
+            perso->atualizarAnimacao(deltaTime, movendoEsq, movendoDir);
+        }
+        else if(iniciouFase)
+        {
+            MensagemTela.setString("PAUSE");
+        }
+
+        // Verifica se já se passaram 3 segundos e muda o estado de "pausado"
+        if (pausado && !iniciouFase) {
+            float tempoDecorrido = pausaTimer.getElapsedTime().asSeconds();
+            float tempoRestante = 3.0f - tempoDecorrido;
+
+            // Verifica se o tempo restante é menor ou igual a zero
+            if (tempoRestante <= 0) {
+                pausado = false;  // Despausa após a contagem regressiva
+                iniciouFase = true;
+            } else {
+                std::stringstream ss;
+                ss << std::fixed << std::setprecision(0) << std::ceil(tempoRestante);
+                MensagemTela.setString("    " + ss.str() + "  ");
+            }
+        }
+
+        // Atualiza o texto do tempo de jogo
+        int minutos = static_cast<int>(tempoEmJogo) / 60;
+        int segundos = static_cast<int>(tempoEmJogo) % 60;
+        std::stringstream ss;
+        ss << std::setw(2) << std::setfill('0') << minutos << ":"
+        << std::setw(2) << std::setfill('0') << segundos;
+        textoTempoEmJogo.setString(ss.str());
     };
 
     void desenha(sf::RenderWindow& window) {
         window.clear(backgroundColor);
-        if (backgroundStatus) {
+        if (backgroundStatus) 
+        {
             window.draw(backgroundSprite);
         }
         window.draw(chao->sprite);
         window.draw(perso->sprite);
+        window.draw(textoTempoEmJogo);
+        if(pausado)
+        {
+            window.draw(MensagemTela);
+        }
         sf::Text fpsText = fps->attFPS(deltaTime);
         window.draw(fpsText);
         window.setView(view);
@@ -173,12 +256,22 @@ class Fase_1
                         isCursorVisible = !isCursorVisible;
                         window.setMouseCursorVisible(isCursorVisible);
                     } 
-                    else if (event.key.code == sf::Keyboard::Escape) 
+                    if (event.key.code == sf::Keyboard::Escape) 
                     {
                         naFase = false;
                     }
+                    if (iniciouFase && pausaTimer.getElapsedTime().asSeconds() >= 0.5f 
+                    && event.key.code == sf::Keyboard::P) 
+                    {
+                        pausaTimer.restart();
+                        pausado = !pausado; // Alterna entre pausado e não pausado
+                    }
+
+                    if(!pausado)
+                    {
+                        inputFase(event);
+                    }
                 }
-                inputFase(event);
             }
 
             faseLoop(window);

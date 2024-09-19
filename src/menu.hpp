@@ -1,5 +1,5 @@
 #ifndef D0A73387_D835_44B4_8E76_B08F62A18124
-#define D0A73387_D835_44B4_8E76_B08F62A18124
+#define D0A73387_D835_44B4_8E76_B08F62A18124 
 
 #ifndef INCLUDES
 #define INCLUDES
@@ -13,6 +13,7 @@
 #include <cmath>
 #include <iomanip>
 #include <vector>
+#include <sstream>
 
 #endif
 
