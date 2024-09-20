@@ -20,7 +20,7 @@
 #include "plataforma.hpp"
 #include "perso.hpp"
 #include "musica.hpp"
-#include "fps.hpp"
+#include "tela.hpp"
 
 class Fase_1
 {
@@ -29,11 +29,6 @@ class Fase_1
     bool pausado;
     unsigned int screenWidth;
     unsigned int screenHeight;
-    bool backgroundStatus;
-    sf::Color backgroundColor;
-    sf::Texture backgroundTexture;
-    sf::Sprite backgroundSprite;
-    sf::View view;
         
     sf::Clock timer; // Timer global
     sf::Clock pausaTimer; // Novo timer para controlar os 3 segundos de pausa
@@ -44,13 +39,8 @@ class Fase_1
     bool movendoDir;
     Personagem * perso;
     Audio * musica;
-    FPS * fps;
     Plataforma * chao;
-
-    // Exibir coisas na tela
-    sf::Font * font;
-    sf::Text textoTempoEmJogo;
-    sf::Text MensagemTela;
+    Tela * tela;
 
     // Função para encapsular cálculo de deltaTime
     void calcularDeltaTime() 
@@ -78,48 +68,22 @@ class Fase_1
         iniciouFase = false;
         movendoEsq = false;
         movendoDir = false;
-        backgroundStatus = false;
-        backgroundColor = sf::Color(170, 170, 255);
     };
 
     ~Fase_1(){
         delete perso;
         delete musica;
-        delete fps;
         delete chao;
-        delete font;
+        delete tela;
     };
 
     void setupFase(unsigned int screenWidth, unsigned int screenHeight) {
-        view = sf::View(sf::FloatRect(0, 0, screenWidth, screenHeight));
 
         musica = new Audio();
         musica->setupAudio("arquivos/fase_1/musica.ogg", true);
 
-        fps = new FPS();
-        fps->setupFPS("arquivos/fonte.ttf");
-
-        font = new sf::Font();
-        font->loadFromFile("./arquivos/fonte.ttf");
-
-        float escala = std::min(static_cast<float>(screenWidth) / 1366, static_cast<float>(screenHeight) / 768);
-
-        // Texto do tempo do jogo
-        textoTempoEmJogo.setFont(*font);
-        textoTempoEmJogo.setCharacterSize(40 * escala);
-        textoTempoEmJogo.setOutlineThickness(1);
-        float xTempoEmJogo = ((1150 * screenWidth) / 1366.0f);
-        float yTempoEmJogo = ((100 * screenHeight) / 768.0f);
-        textoTempoEmJogo.setPosition(xTempoEmJogo, yTempoEmJogo);
-        textoTempoEmJogo.setFillColor(sf::Color::White); // Cor do texto
-
-        // Mensagem na tela
-        MensagemTela.setFont(*font);
-        MensagemTela.setCharacterSize(130 * escala);
-        MensagemTela.setFillColor(sf::Color::White); // Cor do texto
-        float xMensagemTela = ((475 * screenWidth) / 1366.0f);
-        float yMensagemTela = ((200 * screenHeight) / 768.0f);
-        MensagemTela.setPosition(xMensagemTela, yMensagemTela);
+        tela = new Tela();
+        tela->setupTela(screenWidth, screenHeight);
 
         perso = new Personagem();
 
@@ -148,13 +112,6 @@ class Fase_1
         chao->setSize(screenWidth * 1.75f, screenHeight * 0.8f);
         chao->carregarTextura("./arquivos/fase_1/fase1_chao.png");
 
-        if (backgroundTexture.loadFromFile("./arquivos/fase_1/fase1_back.png")) {
-            backgroundStatus = true;
-            backgroundSprite.setTexture(backgroundTexture);
-            backgroundSprite.setScale(
-                float(screenWidth) / backgroundTexture.getSize().x,
-                float(screenHeight) / backgroundTexture.getSize().y);
-        }
     };
 
     void preEvento()
@@ -187,52 +144,27 @@ class Fase_1
             perso->verificarColisao(chao->colisaoArea, deltaTime);
             perso->atualizarAnimacao(deltaTime, movendoEsq, movendoDir);
         }
-        else if(iniciouFase)
-        {
-            MensagemTela.setString("PAUSE");
-        }
-
+        
+        float tempoDecorrido = pausaTimer.getElapsedTime().asSeconds();
+        float tempoRestante = 3.0f - tempoDecorrido;
+        
         // Verifica se já se passaram 3 segundos e muda o estado de "pausado"
         if (pausado && !iniciouFase) {
-            float tempoDecorrido = pausaTimer.getElapsedTime().asSeconds();
-            float tempoRestante = 3.0f - tempoDecorrido;
-
             // Verifica se o tempo restante é menor ou igual a zero
             if (tempoRestante <= 0) {
                 pausado = false;  // Despausa após a contagem regressiva
                 iniciouFase = true;
-            } else {
-                std::stringstream ss;
-                ss << std::fixed << std::setprecision(0) << std::ceil(tempoRestante);
-                MensagemTela.setString("    " + ss.str() + "  ");
             }
         }
 
-        // Atualiza o texto do tempo de jogo
-        int minutos = static_cast<int>(tempoEmJogo) / 60;
-        int segundos = static_cast<int>(tempoEmJogo) % 60;
-        std::stringstream ss;
-        ss << std::setw(2) << std::setfill('0') << minutos << ":"
-        << std::setw(2) << std::setfill('0') << segundos;
-        textoTempoEmJogo.setString(ss.str());
+        tela->loopTela(pausado, iniciouFase, tempoEmJogo, tempoRestante);
     };
 
     void desenha(sf::RenderWindow& window) {
-        window.clear(backgroundColor);
-        if (backgroundStatus) 
-        {
-            window.draw(backgroundSprite);
-        }
+        tela->desenhaBack(window);
         window.draw(chao->sprite);
         window.draw(perso->sprite);
-        window.draw(textoTempoEmJogo);
-        if(pausado)
-        {
-            window.draw(MensagemTela);
-        }
-        sf::Text fpsText = fps->attFPS(deltaTime);
-        window.draw(fpsText);
-        window.setView(view);
+        tela->desenhaInterface(window, pausado, deltaTime);
         window.display();
     };
 
