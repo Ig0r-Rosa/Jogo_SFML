@@ -124,10 +124,10 @@ class Fase_1
         perso = new Personagem();
 
         std::vector<std::string> idle_texture;
-        idle_texture.push_back("./arquivos/persoAn/idle/Idle 1.png");
-        idle_texture.push_back("./arquivos/persoAn/idle/Idle 2.png");
-        idle_texture.push_back("./arquivos/persoAn/idle/Idle 3.png");
-        idle_texture.push_back("./arquivos/persoAn/idle/Idle 4.png");
+        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_1.png");
+        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_2.png");
+        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_3.png");
+        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_4.png");
         perso->carregarIdleTexturas(idle_texture);
 
         std::vector<std::string> run_texture;
