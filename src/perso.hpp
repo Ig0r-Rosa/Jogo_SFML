@@ -14,6 +14,7 @@
 #include <cmath>
 #include <iomanip>
 #include <vector>
+#include <sstream>
 
 #endif
 
@@ -65,6 +66,26 @@ public:
     }
 
     ~Personagem() {}
+
+    void setupPerso()
+    {
+        std::vector<std::string> idle_texture;
+        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_1.png");
+        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_2.png");
+        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_3.png");
+        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_4.png");
+        carregarIdleTexturas(idle_texture);
+
+        std::vector<std::string> run_texture;
+        run_texture.push_back("./arquivos/persoAn/Run/run_1.png");
+        run_texture.push_back("./arquivos/persoAn/Run/run_2.png");
+        run_texture.push_back("./arquivos/persoAn/Run/run_3.png");
+        run_texture.push_back("./arquivos/persoAn/Run/run_4.png");
+        run_texture.push_back("./arquivos/persoAn/Run/run_5.png");
+        run_texture.push_back("./arquivos/persoAn/Run/run_6.png");
+        run_texture.push_back("./arquivos/persoAn/Run/run_7.png");
+        carregarRunTexturas(run_texture);
+    }
 
     // Carrega Textura
     void carregarIdleTexturas(std::vector<std::string> link)

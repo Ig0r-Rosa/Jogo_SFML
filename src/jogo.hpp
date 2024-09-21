@@ -1,5 +1,5 @@
 #ifndef F3F4E2AE_EF7C_4ED9_8E06_896FEA969271
-#define F3F4E2AE_EF7C_4ED9_8E06_896FEA969271
+#define F3F4E2AE_EF7C_4ED9_8E06_896FEA969271 
 
 #ifndef INCLUDES
 #define INCLUDES
@@ -13,6 +13,7 @@
 #include <cmath>
 #include <iomanip>
 #include <vector>
+#include <sstream>
 
 #endif
 

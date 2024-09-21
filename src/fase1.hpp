@@ -13,84 +13,80 @@
 #include <cmath>
 #include <iomanip>
 #include <vector>
+#include <sstream>
 
 #endif
 
 #include "plataforma.hpp"
 #include "perso.hpp"
 #include "musica.hpp"
-#include "fps.hpp"
+#include "tela.hpp"
 
 class Fase_1
 {
     private:
     bool naFase;
+    bool pausado;
     unsigned int screenWidth;
     unsigned int screenHeight;
-    bool backgroundStatus;
-    sf::Color backgroundColor;
-    sf::Texture backgroundTexture;
-    sf::Sprite backgroundSprite;
-    sf::View view;
         
     sf::Clock timer; // Timer global
+    sf::Clock pausaTimer; // Novo timer para controlar os 3 segundos de pausa
+    float tempoEmJogo; 
+    bool iniciouFase;
     float deltaTime; // Guarda diferença do timer global
     bool movendoEsq;
     bool movendoDir;
     Personagem * perso;
     Audio * musica;
-    FPS * fps;
     Plataforma * chao;
+    Tela * tela;
 
     // Função para encapsular cálculo de deltaTime
-    void calcularDeltaTime() {
-        deltaTime = timer.restart().asSeconds();
+    void calcularDeltaTime() 
+    {
+        // Somente atualiza deltaTime se o jogo não estiver pausado
+        if (!pausado) 
+        {
+            deltaTime = timer.restart().asSeconds();
+            tempoEmJogo += deltaTime; // Acumula o tempo de jogo
+        }
+        else 
+        {
+            // Se o jogo estiver pausado, não atualiza o deltaTime e não reinicia o timer
+            timer.restart(); // Impede o acúmulo de tempo durante a pausa
+            deltaTime = 0;
+        }
     }
 
     public:
     Fase_1()
     {
         naFase = true;
+        pausado = true;
+        tempoEmJogo = 0.0;
+        iniciouFase = false;
         movendoEsq = false;
         movendoDir = false;
-        backgroundStatus = false;
-        backgroundColor = sf::Color(170, 170, 255);
     };
 
     ~Fase_1(){
         delete perso;
         delete musica;
-        delete fps;
         delete chao;
+        delete tela;
     };
 
     void setupFase(unsigned int screenWidth, unsigned int screenHeight) {
-        view = sf::View(sf::FloatRect(0, 0, screenWidth, screenHeight));
 
         musica = new Audio();
         musica->setupAudio("arquivos/fase_1/musica.ogg", true);
 
-        fps = new FPS();
-        fps->setupFPS("arquivos/fonte.ttf");
+        tela = new Tela();
+        tela->setupTela(screenWidth, screenHeight);
 
         perso = new Personagem();
-
-        std::vector<std::string> idle_texture;
-        idle_texture.push_back("./arquivos/persoAn/idle/Idle 1.png");
-        idle_texture.push_back("./arquivos/persoAn/idle/Idle 2.png");
-        idle_texture.push_back("./arquivos/persoAn/idle/Idle 3.png");
-        idle_texture.push_back("./arquivos/persoAn/idle/Idle 4.png");
-        perso->carregarIdleTexturas(idle_texture);
-
-        std::vector<std::string> run_texture;
-        run_texture.push_back("./arquivos/persoAn/Run/run_1.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_2.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_3.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_4.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_5.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_6.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_7.png");
-        perso->carregarRunTexturas(run_texture);
+        perso->setupPerso();
 
         perso->setScale(3.5f, 3.5f, screenWidth, screenHeight);
         perso->setPos(screenWidth, screenHeight);
@@ -100,13 +96,6 @@ class Fase_1
         chao->setSize(screenWidth * 1.75f, screenHeight * 0.8f);
         chao->carregarTextura("./arquivos/fase_1/fase1_chao.png");
 
-        if (backgroundTexture.loadFromFile("./arquivos/fase_1/fase1_back.png")) {
-            backgroundStatus = true;
-            backgroundSprite.setTexture(backgroundTexture);
-            backgroundSprite.setScale(
-                float(screenWidth) / backgroundTexture.getSize().x,
-                float(screenHeight) / backgroundTexture.getSize().y);
-        }
     };
 
     void preEvento()
@@ -117,39 +106,49 @@ class Fase_1
 
     void inputFase(sf::Event &event)
     {
-        if (event.type == sf::Event::KeyPressed)
+        
+        // Movimento do personagem
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
         {
-            // Movimento do personagem
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
-            {
-                perso->andarEsq(deltaTime);
-                movendoEsq = true;
-            }
-            else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
-            {
-                perso->andarDir(deltaTime);
-                movendoDir = true;
-            }
+            perso->andarEsq(deltaTime);
+            movendoEsq = true;
+        }
+        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        {
+            perso->andarDir(deltaTime);
+            movendoDir = true;
         }
     };
 
     void faseLoop(sf::RenderWindow& window) {
         calcularDeltaTime();  // Atualiza o deltaTime
-        perso->aplicarGravidade(deltaTime);
-        perso->verificarColisao(chao->colisaoArea, deltaTime);
-        perso->atualizarAnimacao(deltaTime, movendoEsq, movendoDir);
+        if(!pausado)
+        {
+            perso->aplicarGravidade(deltaTime);
+            perso->verificarColisao(chao->colisaoArea, deltaTime);
+            perso->atualizarAnimacao(deltaTime, movendoEsq, movendoDir);
+        }
+        
+        float tempoDecorrido = pausaTimer.getElapsedTime().asSeconds();
+        float tempoRestante = 3.0f - tempoDecorrido;
+        
+        // Verifica se já se passaram 3 segundos e muda o estado de "pausado"
+        if (pausado && !iniciouFase) {
+            // Verifica se o tempo restante é menor ou igual a zero
+            if (tempoRestante <= 0) {
+                pausado = false;  // Despausa após a contagem regressiva
+                iniciouFase = true;
+            }
+        }
+
+        tela->loopTela(pausado, iniciouFase, tempoEmJogo, tempoRestante);
     };
 
     void desenha(sf::RenderWindow& window) {
-        window.clear(backgroundColor);
-        if (backgroundStatus) {
-            window.draw(backgroundSprite);
-        }
+        tela->desenhaBack(window);
         window.draw(chao->sprite);
         window.draw(perso->sprite);
-        sf::Text fpsText = fps->attFPS(deltaTime);
-        window.draw(fpsText);
-        window.setView(view);
+        tela->desenhaInterface(window, pausado, deltaTime);
         window.display();
     };
 
@@ -173,12 +172,22 @@ class Fase_1
                         isCursorVisible = !isCursorVisible;
                         window.setMouseCursorVisible(isCursorVisible);
                     } 
-                    else if (event.key.code == sf::Keyboard::Escape) 
+                    if (event.key.code == sf::Keyboard::Escape) 
                     {
                         naFase = false;
                     }
+                    if (iniciouFase && pausaTimer.getElapsedTime().asSeconds() >= 0.5f 
+                    && event.key.code == sf::Keyboard::P) 
+                    {
+                        pausaTimer.restart();
+                        pausado = !pausado; // Alterna entre pausado e não pausado
+                    }
+
+                    if(!pausado)
+                    {
+                        inputFase(event);
+                    }
                 }
-                inputFase(event);
             }
 
             faseLoop(window);
