@@ -86,23 +86,7 @@ class Fase_1
         tela->setupTela(screenWidth, screenHeight);
 
         perso = new Personagem();
-
-        std::vector<std::string> idle_texture;
-        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_1.png");
-        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_2.png");
-        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_3.png");
-        idle_texture.push_back("./arquivos/persoAn/Idle/Idle_4.png");
-        perso->carregarIdleTexturas(idle_texture);
-
-        std::vector<std::string> run_texture;
-        run_texture.push_back("./arquivos/persoAn/Run/run_1.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_2.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_3.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_4.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_5.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_6.png");
-        run_texture.push_back("./arquivos/persoAn/Run/run_7.png");
-        perso->carregarRunTexturas(run_texture);
+        perso->setupPerso();
 
         perso->setScale(3.5f, 3.5f, screenWidth, screenHeight);
         perso->setPos(screenWidth, screenHeight);
