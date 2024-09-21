@@ -75,7 +75,7 @@ class Tela
         MensagemTela.setFont(*font);
         MensagemTela.setCharacterSize(130 * escala);
         MensagemTela.setFillColor(sf::Color::White); // Cor do texto
-        float xMensagemTela = ((475 * screenWidth) / 1366.0f);
+        float xMensagemTela = ((485 * screenWidth) / 1366.0f);
         float yMensagemTela = ((200 * screenHeight) / 768.0f);
         MensagemTela.setPosition(xMensagemTela, yMensagemTela);
 
@@ -112,6 +112,8 @@ class Tela
         ss << std::setw(2) << std::setfill('0') << minutos << ":"
         << std::setw(2) << std::setfill('0') << segundos;
         textoTempoEmJogo.setString(ss.str());
+
+        
     };
 
     void desenhaBack(sf::RenderWindow& window)

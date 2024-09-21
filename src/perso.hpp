@@ -49,10 +49,15 @@ private:
     float aceY; // Aceleração gravitacional (pode ajustar conforme necessário)
     float velY; // Velocidade vertical do personagem
     float velX; // Velocidade de movimento do personagem (pixels por segundo)
+    float posX;
+    float posY;
 
 public:
     sf::Sprite sprite;
     sf::FloatRect spriteBounds;
+    // Meio do personagem
+    float meioX; 
+    float meioY;
 
     Personagem()
     {
@@ -67,8 +72,9 @@ public:
 
     ~Personagem() {}
 
-    void setupPerso()
+    void setupPerso(unsigned int screenWidth, unsigned int screenHeight)
     {
+
         std::vector<std::string> idle_texture;
         idle_texture.push_back("./arquivos/persoAn/Idle/Idle_1.png");
         idle_texture.push_back("./arquivos/persoAn/Idle/Idle_2.png");
@@ -138,10 +144,13 @@ public:
         float imgHeight = sprite.getGlobalBounds().height;
 
         // Calcula a posição desejada para o sprite -> (screenWidth/2, (screenHeight * 3) / 5)
-        float posX = screenWidth / 2;
-        float posY = (screenHeight * 3) / 5;
+        posX = (screenWidth / 2);// - (imgWidth / 2);
+        posY = (screenHeight * 2.75) / 5;
+
+        meioX = posX;
+        meioY = posY;
         
-        sprite.setPosition(posX - (imgWidth / 6), posY - (imgHeight / 6));
+        sprite.setPosition(posX, posY);
     }
 
     void setScale(float scaX, float scaY, int screenWidth, int screenHeight)
@@ -262,6 +271,7 @@ public:
             inverterDirecao();
         }
         sprite.move(-velX * deltaTime, 0);
+        posX += -velX * deltaTime;
     }
 
     // Movimento do personagem para a direita
@@ -272,6 +282,7 @@ public:
             inverterDirecao();
         }
         sprite.move(velX * deltaTime, 0);
+        posX += velX * deltaTime;
     }
 
     // Método para inverter a direção do sprite

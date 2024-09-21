@@ -86,7 +86,7 @@ class Fase_1
         tela->setupTela(screenWidth, screenHeight);
 
         perso = new Personagem();
-        perso->setupPerso();
+        perso->setupPerso(screenWidth, screenHeight);
 
         perso->setScale(3.5f, 3.5f, screenWidth, screenHeight);
         perso->setPos(screenWidth, screenHeight);
