@@ -127,10 +127,13 @@ class Tela
         sf::Vector2f currentCenter = view.getCenter();
 
         // Suaviza o movimento da câmera com base no deltaTime (interpolação linear)
-        float smoothingFactor = 4.5f; // Ajuste esse valor para mais suavidade
+        fps->attFPS(deltaTime);
+        float fpsAtual = fps->getFPS();
+        if(fpsAtual > 60.0f * 1.05){fpsAtual = 60.0f * 1.05;}
+        float smoothingFactor = fpsAtual; // Ajuste esse valor para mais suavidade
 
-        float newX = currentCenter.x + (targetX - currentCenter.x) * smoothingFactor * deltaTime;
-        float newY = currentCenter.y + (targetY - currentCenter.y) * smoothingFactor * deltaTime;
+        float newX = currentCenter.x + (targetX - currentCenter.x) * deltaTime * smoothingFactor;
+        float newY = currentCenter.y + (targetY - currentCenter.y) * deltaTime * smoothingFactor;
 
         // Atualize o centro da view com as coordenadas suavizadas
         view.setCenter(std::round(newX), std::round(newY));
@@ -165,8 +168,7 @@ class Tela
         {
             window.draw(MensagemTela);
         }
-        sf::Text fpsText = fps->attFPS(deltaTime);
-        window.draw(fpsText);
+        //window.draw(fps->getFPStext());
     };
 
 };

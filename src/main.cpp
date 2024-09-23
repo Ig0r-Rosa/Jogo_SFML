@@ -37,6 +37,7 @@ int main()
 
     // Ativa o VSync
     window.setVerticalSyncEnabled(true);
+    window.setFramerateLimit(60);
 
     // Chama o setup do jogo //
     if(setupJogo() != 0){return -1;}

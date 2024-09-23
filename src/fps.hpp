@@ -55,7 +55,7 @@ class FPS
         return achou;
     };
 
-    sf::Text attFPS(float deltaTime)
+    void attFPS(float deltaTime)
     {
         frameCount++;
         fpsDeltaTime += deltaTime;
@@ -66,8 +66,17 @@ class FPS
             frameCount = 0;
             fpsDeltaTime = 0;
         }
-        return fpsText;
     };
+
+    float getFPS()
+    {
+        return fps;
+    };
+
+    sf::Text getFPStext()
+    {
+        return fpsText;
+    }
 
     void attPosFPS(float iniX, float iniY)
     {

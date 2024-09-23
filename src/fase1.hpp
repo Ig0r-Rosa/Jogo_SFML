@@ -45,10 +45,10 @@ class Fase_1
     // Função para encapsular cálculo de deltaTime
     void calcularDeltaTime() 
     {
+        deltaTime = timer.restart().asSeconds();
         // Somente atualiza deltaTime se o jogo não estiver pausado
         if (!pausado) 
         {
-            deltaTime = timer.restart().asSeconds();
             tempoEmJogo += deltaTime; // Acumula o tempo de jogo
         }
         else 
@@ -70,14 +70,16 @@ class Fase_1
         movendoDir = false;
     };
 
-    ~Fase_1(){
+    ~Fase_1()
+    {
         delete perso;
         delete musica;
         delete chao;
         delete tela;
     };
 
-    void setupFase(unsigned int screenWidth, unsigned int screenHeight) {
+    void setupFase(unsigned int screenWidth, unsigned int screenHeight) 
+    {
 
         musica = new Audio();
         musica->setupAudio("arquivos/fase_1/musica.ogg", true);
@@ -113,14 +115,15 @@ class Fase_1
             perso->andarEsq(deltaTime);
             movendoEsq = true;
         }
-        else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+        if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
         {
             perso->andarDir(deltaTime);
             movendoDir = true;
         }
     };
 
-    void faseLoop(sf::RenderWindow& window) {
+    void faseLoop(sf::RenderWindow& window) 
+    {
         calcularDeltaTime();  // Atualiza o deltaTime
         
         if(!pausado)
@@ -146,7 +149,8 @@ class Fase_1
         tela->loopTela(pausado, iniciouFase, tempoEmJogo, tempoRestante);
     };
 
-    void desenha(sf::RenderWindow& window) {
+    void desenha(sf::RenderWindow& window) 
+    {
         tela->desenhaBack(window);
         window.draw(chao->sprite);
         window.draw(perso->sprite);
@@ -154,7 +158,8 @@ class Fase_1
         window.display();
     };
 
-    void run(sf::RenderWindow& window) {
+    void run(sf::RenderWindow& window) 
+    {
         int isCursorVisible = false;
         window.setMouseCursorVisible(isCursorVisible);
         while (naFase) {
