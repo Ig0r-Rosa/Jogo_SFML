@@ -75,7 +75,7 @@ class Tela
         MensagemTela.setFont(*font);
         MensagemTela.setCharacterSize(130 * escala);
         MensagemTela.setFillColor(sf::Color::White); // Cor do texto
-        float xMensagemTela = ((475 * screenWidth) / 1366.0f);
+        float xMensagemTela = ((485 * screenWidth) / 1366.0f);
         float yMensagemTela = ((200 * screenHeight) / 768.0f);
         MensagemTela.setPosition(xMensagemTela, yMensagemTela);
 
@@ -114,6 +114,44 @@ class Tela
         textoTempoEmJogo.setString(ss.str());
     };
 
+    void attCamera(sf::RenderWindow& window, sf::FloatRect bounds, float deltaTime)
+    {
+        // Obtenha a posição alvo da câmera (centro do personagem)
+        float targetX = bounds.left + bounds.width / 2.0f;
+        float targetY = bounds.top + bounds.height / 2.0f;
+
+        // Deslocamento para ajustar a câmera verticalmente (se necessário)
+        targetY -= ((150 * screenY) / 768);
+
+        // Pega a posição atual da câmera
+        sf::Vector2f currentCenter = view.getCenter();
+
+        // Suaviza o movimento da câmera com base no deltaTime (interpolação linear)
+        fps->attFPS(deltaTime);
+        float fpsAtual = fps->getFPS();
+        if(fpsAtual > 60.0f * 1.05){fpsAtual = 60.0f * 1.05;}
+        float smoothingFactor = fpsAtual; // Ajuste esse valor para mais suavidade
+
+        float newX = currentCenter.x + (targetX - currentCenter.x) * deltaTime * smoothingFactor;
+        float newY = currentCenter.y + (targetY - currentCenter.y) * deltaTime * smoothingFactor;
+
+        // Atualize o centro da view com as coordenadas suavizadas
+        view.setCenter(std::round(newX), std::round(newY));
+        
+        // Define a view
+        window.setView(view);
+
+        // Atualiza a posição do background e interface
+        float novoIniX = view.getCenter().x - (screenX / 2);
+        float novoIniY = view.getCenter().y - (screenY / 2);
+        backgroundSprite.setPosition(novoIniX, novoIniY);
+        fps->attPosFPS(novoIniX, novoIniY);
+        textoTempoEmJogo.setPosition( novoIniX + ((1150 * screenX) / 1366.0f), 
+                                      novoIniY + ((100 * screenY) / 768.0f));
+        MensagemTela.setPosition( novoIniX + ((485 * screenX) / 1366.0f), 
+                                  novoIniY + ((200 * screenY) / 768.0f));
+    };
+
     void desenhaBack(sf::RenderWindow& window)
     {
         window.clear(backgroundColor);
@@ -130,9 +168,7 @@ class Tela
         {
             window.draw(MensagemTela);
         }
-        sf::Text fpsText = fps->attFPS(deltaTime);
-        window.draw(fpsText);
-        window.setView(view);
+        //window.draw(fps->getFPStext());
     };
 
 };

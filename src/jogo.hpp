@@ -36,6 +36,7 @@ bool isCursorVisible;
 
 // Jogo
 int estaEm;
+sf::View menuView;
 Menu * menu;
 
 int setupJogo()
@@ -45,6 +46,8 @@ int setupJogo()
 
     menu = new Menu();
     menu->setupMenu(screenWidth, screenHeight);
+
+    menuView = sf::View(sf::FloatRect(0, 0, screenWidth, screenHeight));
 
     return 0;
 }
@@ -78,6 +81,7 @@ void loopJogo()
             delete fase1;
 
             menu->musica->play(true);
+            window.setView(menuView);
         }
 
         menu->eventosLoop(window, event, estaEm);
