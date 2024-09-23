@@ -112,8 +112,41 @@ class Tela
         ss << std::setw(2) << std::setfill('0') << minutos << ":"
         << std::setw(2) << std::setfill('0') << segundos;
         textoTempoEmJogo.setString(ss.str());
+    };
 
+    void attCamera(sf::RenderWindow& window, sf::FloatRect bounds, float deltaTime)
+    {
+        // Obtenha a posição alvo da câmera (centro do personagem)
+        float targetX = bounds.left + bounds.width / 2.0f;
+        float targetY = bounds.top + bounds.height / 2.0f;
+
+        // Deslocamento para ajustar a câmera verticalmente (se necessário)
+        targetY -= ((150 * screenY) / 768);
+
+        // Pega a posição atual da câmera
+        sf::Vector2f currentCenter = view.getCenter();
+
+        // Suaviza o movimento da câmera com base no deltaTime (interpolação linear)
+        float smoothingFactor = 4.5f; // Ajuste esse valor para mais suavidade
+
+        float newX = currentCenter.x + (targetX - currentCenter.x) * smoothingFactor * deltaTime;
+        float newY = currentCenter.y + (targetY - currentCenter.y) * smoothingFactor * deltaTime;
+
+        // Atualize o centro da view com as coordenadas suavizadas
+        view.setCenter(std::round(newX), std::round(newY));
         
+        // Define a view
+        window.setView(view);
+
+        // Atualiza a posição do background e interface
+        float novoIniX = view.getCenter().x - (screenX / 2);
+        float novoIniY = view.getCenter().y - (screenY / 2);
+        backgroundSprite.setPosition(novoIniX, novoIniY);
+        fps->attPosFPS(novoIniX, novoIniY);
+        textoTempoEmJogo.setPosition( novoIniX + ((1150 * screenX) / 1366.0f), 
+                                      novoIniY + ((100 * screenY) / 768.0f));
+        MensagemTela.setPosition( novoIniX + ((485 * screenX) / 1366.0f), 
+                                  novoIniY + ((200 * screenY) / 768.0f));
     };
 
     void desenhaBack(sf::RenderWindow& window)
@@ -134,7 +167,6 @@ class Tela
         }
         sf::Text fpsText = fps->attFPS(deltaTime);
         window.draw(fpsText);
-        window.setView(view);
     };
 
 };

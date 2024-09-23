@@ -56,8 +56,6 @@ public:
     sf::Sprite sprite;
     sf::FloatRect spriteBounds;
     // Meio do personagem
-    float meioX; 
-    float meioY;
 
     Personagem()
     {
@@ -146,9 +144,6 @@ public:
         // Calcula a posição desejada para o sprite -> (screenWidth/2, (screenHeight * 3) / 5)
         posX = (screenWidth / 2);// - (imgWidth / 2);
         posY = (screenHeight * 2.75) / 5;
-
-        meioX = posX;
-        meioY = posY;
         
         sprite.setPosition(posX, posY);
     }

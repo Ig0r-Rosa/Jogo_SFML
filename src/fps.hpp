@@ -69,6 +69,13 @@ class FPS
         return fpsText;
     };
 
+    void attPosFPS(float iniX, float iniY)
+    {
+        float posX = iniX + 10;
+        float posY = iniY + 10;
+        fpsText.setPosition(posX, posY);
+    };
+
 };
 
 #endif /* FE79A794_5D72_4049_A656_4782AEC93079 */

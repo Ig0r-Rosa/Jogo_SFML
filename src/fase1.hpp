@@ -122,6 +122,7 @@ class Fase_1
 
     void faseLoop(sf::RenderWindow& window) {
         calcularDeltaTime();  // Atualiza o deltaTime
+        
         if(!pausado)
         {
             perso->aplicarGravidade(deltaTime);
@@ -141,6 +142,7 @@ class Fase_1
             }
         }
 
+        tela->attCamera(window, perso->sprite.getGlobalBounds(), deltaTime);
         tela->loopTela(pausado, iniciouFase, tempoEmJogo, tempoRestante);
     };
 
