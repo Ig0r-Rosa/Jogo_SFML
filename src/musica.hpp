@@ -17,6 +17,10 @@
 
 #endif
 
+#ifdef __linux__
+#include <AL/alc.h>
+#endif
+
 class Audio
 {
     private:
@@ -35,19 +39,41 @@ class Audio
         
     };
 
-    void setupAudio(std::string link, bool loop)
+    bool audioDisponivel()
     {
-        if (backgroundMusic.openFromFile(link)) {
-            achou = true;
-        }
-        // Inicia a reprodução da música em loop
-        backgroundMusic.setLoop(loop);
-        backgroundMusic.play();
+#ifdef __linux__
+        return alcGetCurrentContext() != nullptr;
+#else
+        return true;
+#endif
     }
 
-    void play(bool esc)
+    void setupAudio(std::string link, bool loop)
     {
-        if(esc)
+        if (!audioDisponivel())
+        {
+            return;
+        }
+        if (!backgroundMusic.openFromFile(link))
+        {
+            return;
+        }
+        backgroundMusic.setLoop(loop);
+        backgroundMusic.play();
+        achou = (backgroundMusic.getStatus() == sf::Music::Playing);
+        if (!achou)
+        {
+            backgroundMusic.stop();
+        }
+    }
+
+    void play(bool tocar)
+    {
+        if (!achou)
+        {
+            return;
+        }
+        if (tocar)
         {
             backgroundMusic.play();
         }
@@ -55,7 +81,23 @@ class Audio
         {
             backgroundMusic.stop();
         }
-    };
+    }
+
+    void pausar()
+    {
+        if (achou)
+        {
+            backgroundMusic.pause();
+        }
+    }
+
+    void retomar()
+    {
+        if (achou)
+        {
+            backgroundMusic.play();
+        }
+    }
 
     bool rodou()
     {

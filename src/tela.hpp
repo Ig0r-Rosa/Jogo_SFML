@@ -127,7 +127,7 @@ class Tela
         sf::Vector2f currentCenter = view.getCenter();
 
         // Suaviza o movimento da câmera com base no deltaTime (interpolação linear)
-        fps->attFPS(deltaTime);
+        fps->attFPS();
         float fpsAtual = fps->getFPS();
         if(fpsAtual > 60.0f * 1.05){fpsAtual = 60.0f * 1.05;}
         float smoothingFactor = fpsAtual; // Ajuste esse valor para mais suavidade
@@ -168,7 +168,7 @@ class Tela
         {
             window.draw(MensagemTela);
         }
-        //window.draw(fps->getFPStext());
+        window.draw(fps->getFPStext());
     };
 
 };

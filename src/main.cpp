@@ -18,15 +18,7 @@
 // Main
 int main()
 {
-    // Janela //
-    // Obtém a resolução da tela principal
-    desktopMode = sf::VideoMode::getDesktopMode();
-    screenWidth = desktopMode.width;
-    screenHeight = desktopMode.height;
-    settings.antialiasingLevel = 8;  // Ative o anti-aliasing
-    window.create(sf::VideoMode(screenWidth, screenHeight), "app",
-    sf::Style::Fullscreen, settings);
-    
+    criarJanela();
     aspectRatio = static_cast<float>(window.getSize().x) / window.getSize().y;
 
     // Esconde o mouse e aparece apenas quando aperta "."

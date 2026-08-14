@@ -17,12 +17,18 @@
 
 #endif
 
+#ifdef __linux__
+#include <unistd.h>
+#include <limits.h>
+#endif
+
 // Includes
 #include "fase1.hpp"
 #include "menu.hpp"
 
 // Indica a função para utiliza-la antes de seu corpo
 void aplicarLetterbox(int windowWidth, int windowHeight);
+void criarJanela();
 
 // Variaveis //
 // Window
@@ -38,6 +44,51 @@ bool isCursorVisible;
 int estaEm;
 sf::View menuView;
 Menu * menu;
+
+// Modo de um monitor só. getDesktopMode() no X11 junta as 2 telas (ex.: 3840x1080).
+sf::VideoMode modoDaTelaPrincipal()
+{
+    const std::vector<sf::VideoMode> modos = sf::VideoMode::getFullscreenModes();
+    if (!modos.empty())
+    {
+        return modos.front();
+    }
+    return sf::VideoMode::getDesktopMode();
+}
+
+// Assets ficam em compilado/arquivos (caminho relativo ./arquivos/...).
+void irParaPastaDoExecutavel()
+{
+#ifdef __linux__
+    char buf[PATH_MAX];
+    const ssize_t n = readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    if (n <= 0)
+    {
+        return;
+    }
+    buf[n] = '\0';
+    const std::string caminho(buf);
+    const auto pos = caminho.find_last_of('/');
+    if (pos != std::string::npos)
+    {
+        chdir(caminho.substr(0, pos).c_str());
+    }
+#endif
+}
+
+// Janela sem borda: cobre a tela sem trocar o modo do monitor (quebra no Wayland).
+void criarJanela()
+{
+    irParaPastaDoExecutavel();
+
+    desktopMode = modoDaTelaPrincipal();
+    screenWidth = desktopMode.width;
+    screenHeight = desktopMode.height;
+    settings.antialiasingLevel = 8;
+
+    window.create(desktopMode, "app", sf::Style::None, settings);
+    window.setPosition(sf::Vector2i(0, 0));
+}
 
 int setupJogo()
 {

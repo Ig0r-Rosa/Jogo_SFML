@@ -187,7 +187,15 @@ class Fase_1
                     && event.key.code == sf::Keyboard::P) 
                     {
                         pausaTimer.restart();
-                        pausado = !pausado; // Alterna entre pausado e não pausado
+                        pausado = !pausado;
+                        if (pausado)
+                        {
+                            musica->pausar();
+                        }
+                        else
+                        {
+                            musica->retomar();
+                        }
                     }
 
                     if(!pausado)

@@ -26,6 +26,7 @@ class FPS
     float frameCount;
     sf::Text fpsText;
     float fpsDeltaTime;
+    sf::Clock fpsClock;
 
     public:
 
@@ -41,13 +42,19 @@ class FPS
 
     void setupFPS(std::string link)
     {
-        if (font.loadFromFile(link)) {
-            achou = true;
+        if (!font.loadFromFile(link))
+        {
+            return;
         }
+        achou = true;
         fpsText.setFont(font);
-        fpsText.setCharacterSize(24);
+        fpsText.setCharacterSize(22);
         fpsText.setFillColor(sf::Color(100, 255, 100));
+        fpsText.setOutlineColor(sf::Color::Black);
+        fpsText.setOutlineThickness(2);
         fpsText.setPosition(10, 10);
+        fpsText.setString("FPS: --");
+        fpsClock.restart();
     }
 
     bool getAchou()
@@ -55,11 +62,16 @@ class FPS
         return achou;
     };
 
-    void attFPS(float deltaTime)
+    // Relógio próprio: continua medindo mesmo com o jogo pausado (deltaTime = 0).
+    void attFPS()
     {
+        if (!achou)
+        {
+            return;
+        }
         frameCount++;
-        fpsDeltaTime += deltaTime;
-        if(fpsDeltaTime >= 1)
+        fpsDeltaTime += fpsClock.restart().asSeconds();
+        if (fpsDeltaTime >= 0.5f)
         {
             fps = std::round(frameCount / fpsDeltaTime);
             fpsText.setString("FPS: " + std::to_string(static_cast<int>(fps)));
